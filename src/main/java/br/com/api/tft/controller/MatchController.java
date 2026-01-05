@@ -5,6 +5,7 @@ import br.com.api.tft.dto.MatchDTO;
 import br.com.api.tft.exception.ApiKeyException;
 import br.com.api.tft.service.CSVExportService;
 import br.com.api.tft.service.MatchService;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +65,8 @@ public class MatchController {
         }
     }
 
-    @GetMapping("/by-filename/{filename}")
-    public ResponseEntity<List<MatchDTO>> getMatchDataFromFile(@PathVariable String filename) {
+    @GetMapping("/trait/by-filename/{filename}")
+    public ResponseEntity<List<MatchDTO>> getTraitDataFromFile(@PathVariable String filename) {
         logger.info("Received request to get match data for file: {}", filename);
 
         try {
@@ -81,6 +82,29 @@ public class MatchController {
             String[] sub = filename.split("\\d");
             String player = sub[0];
             csvExportService.exportTraitDataToCSV(datas, player);
+            return ResponseEntity.ok(datas);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/unit/by-filename/{filename}")
+    public ResponseEntity<List<MatchDTO>> getUnitDataFromFile(@PathVariable String filename) {
+        logger.info("Received request to get match data for file: {}", filename);
+
+        try {
+            Resource resource = new ClassPathResource(filename);
+            File file = resource.getFile();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            List<MatchDTO> datas = new ArrayList<>();
+            for (String id : bufferedReader.lines().collect(Collectors.toSet())) {
+                logger.info("Getting data for match: {}", id);
+                MatchDTO matchData = matchService.getMatchDataFromId(id);
+                datas.add(matchData);
+            }
+            String[] sub = filename.split("\\d");
+            String player = sub[0];
+            csvExportService.exportUnitDataToCSV(datas, player);
             return ResponseEntity.ok(datas);
         } catch (IOException e) {
             throw new RuntimeException(e);

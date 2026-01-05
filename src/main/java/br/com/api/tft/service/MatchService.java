@@ -26,6 +26,7 @@ public class MatchService {
     @Autowired
     private ApiErrorHandlingService errorHandlingService;
 
+    @Autowired
     private AccountService accountService;
 
     /**
@@ -37,7 +38,7 @@ public class MatchService {
     public List<String> getMatchIdsFromPuuid(String puuid) {
         AccountResponseDTO dto = accountService.getPlayerByPuuid(puuid);
         logger.info("Getting match IDs for player: {}", dto.gameName() + "#" + dto.tagLine());
-        String filename = dto.gameName() + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt";
+        String filename = dto.gameName() + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt";
         List<String> matchIds = matchClient.getMatchIDsFromPuuid(puuid);
         try (FileWriter writer = new FileWriter(filename)) {
             for (String id : matchIds) {
@@ -51,24 +52,13 @@ public class MatchService {
     }
 
     /**
-     * Gets match IDs for a player by PUUID with pagination support and error handling.
-     *
-     * @param puuid The PUUID of the player
-     * @param count The number of match IDs to retrieve
-     * @return A list of match IDs
-     */
-    public List<String> getMatchIdsFromPuuid(String puuid, int count) {
-        logger.info("Getting {} match IDs for player with PUUID: {}", count, puuid);
-        return errorHandlingService.executeWithErrorHandling(() -> matchClient.getMatchIDsFromPuuid(count));
-    }
-
-    /**
      * Gets detailed match data by match ID with error handling.
      *
      * @param matchId The match ID
      * @return The match data
      */
     public MatchDTO getMatchDataFromId(String matchId) {
+        System.out.println("Getting match data for match ID: " + matchId);
         logger.info("Getting match data for match ID: {}", matchId);
         return errorHandlingService.executeWithErrorHandling(() -> matchClient.getMatchDataById(matchId));
     }

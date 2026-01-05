@@ -13,8 +13,10 @@ public class AccountService {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
 
+    @Autowired
     private AccountClient accountClient;
 
+    @Autowired
     private ApiErrorHandlingService errorHandlingService;
 
     public AccountResponseDTO getPlayerByPuuid(String puuid) {

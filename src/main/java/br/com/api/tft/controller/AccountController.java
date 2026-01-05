@@ -22,6 +22,7 @@ public class AccountController {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
+    @Autowired
     private AccountService accountService;
 
     @GetMapping("/{puuid}")
